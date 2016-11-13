@@ -4,6 +4,9 @@
 #
 #######################################################
 
+# Revision number to form part of released version of qemu-rpi-kernel.
+QEMU_RPI_KERNEL_REVISION=1
+
 TOOLCHAIN=arm-linux-gnueabihf
 BRANCH=raspberrypi-kernel_1.20160921-1
 INSTALL_PACKAGES=""
@@ -43,7 +46,7 @@ echo "building qemu raspberry pi kernel kernel-qemu-$KERNEL_VERSION"
 
 cat >> .config << EOF
 CONFIG_CROSS_COMPILE="$TOOLCHAIN"
-CONFIG_LOCALVERSION="-qemu-rpi"
+CONFIG_LOCALVERSION="-qemu-rpi-$QEMU_RPI_KERNEL_REVISION"
 CONFIG_CPU_V6=y
 CONFIG_ARM_ERRATA_411920=y
 CONFIG_ARM_ERRATA_364296=y
