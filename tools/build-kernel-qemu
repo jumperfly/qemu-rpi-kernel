@@ -1,15 +1,12 @@
 #!/bin/bash -e
 #
-# Build ARM kernel 4.1.7 for QEMU Raspberry Pi Emulation
+# Build ARM kernel for QEMU Raspberry Pi Emulation
 #
 #######################################################
 
 TOOLCHAIN=arm-linux-gnueabihf
-COMMIT=423c680bd722670f4b39ea79089859df02b411b6
-COMMIT=raspberrypi-kernel_1.20160620-1
-COMMIT=""
+BRANCH=raspberrypi-kernel_1.20160921-1
 INSTALL_PACKAGES=""
-USE_GIT=1
 
 if [ -f build-kernel-qemu.conf ] ; then
 	. build-kernel-qemu.conf
@@ -20,24 +17,22 @@ if [ "$INSTALL_PACKAGES" ] ; then
 	sudo apt-get install git libncurses5-dev gcc-arm-linux-gnueabihf
 fi
 
-if [ "$USE_GIT" ] ; then
-	# checking out 4.1.7+ branch - change it if you want to change kernel version
-	# for kernel specific hash, have a looks at : https://github.com/raspberrypi/linux/commits/rpi-4.1.y
+if [ -n "$BRANCH" ] ; then
+	# change BRANCH if you want to change kernel version
+	# for kernel specific tags, have a looks at : https://github.com/raspberrypi/linux/tags
 	if [ ! -d linux ] ; then
-		git clone https://github.com/raspberrypi/linux.git
+		git clone --branch $BRANCH --depth 1 https://github.com/raspberrypi/linux.git
 	else
-		echo "using existing linux sources!"
+		echo "using existing linux sources, reverting changes!"
+		cd linux
+		git clean -fd
+		git reset --hard
+		cd ..
 	fi
 	cd linux
-	if [ "$COMMIT" ] ; then
-		git checkout "$COMMIT"
-	fi
 else
-	if [ -z "$COMMIT" ] ; then echo "COMMIT missing!" >&2 ; exit 1 ; fi
-	wget -c https://github.com/raspberrypi/linux/archive/${COMMIT}.zip -O linux-${COMMIT}.zip
-	rm -rf linux-${COMMIT}
-	unzip linux-${COMMIT}.zip
-	cd linux-${COMMIT}
+	echo "BRANCH missing!" >&2
+	exit 1
 fi
 
 patch -p1 < ../linux-arm.patch
