@@ -15,6 +15,8 @@ if [ -f build-kernel-qemu.conf ] ; then
 	. build-kernel-qemu.conf
 fi
 
+mkdir -p target
+
 if [ "$INSTALL_PACKAGES" ] ; then
 	sudo apt-get update
 	sudo apt-get install git libncurses5-dev gcc-arm-linux-gnueabihf
@@ -97,5 +99,5 @@ cat ../config_ip_tables >> .config
 
 make -j 4 -k ARCH=arm CROSS_COMPILE=${TOOLCHAIN}- menuconfig
 make -j 4 -k ARCH=arm CROSS_COMPILE=${TOOLCHAIN}- bzImage
-cp arch/arm/boot/zImage ../kernel-qemu-$KERNEL_VERSION
+cp arch/arm/boot/zImage ../target/kernel-$KERNEL_VERSION-qemu-rpi-$QEMU_RPI_KERNEL_REVISION
 cd ..
