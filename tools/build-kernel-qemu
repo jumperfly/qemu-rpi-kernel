@@ -8,8 +8,29 @@
 QEMU_RPI_KERNEL_REVISION=1
 
 TOOLCHAIN=arm-linux-gnueabihf
-BRANCH=raspberrypi-kernel_1.20160921-1
-INSTALL_PACKAGES=""
+
+##
+# Change BRANCH if you want to change kernel version 
+#
+# Ideally this a tag from https://github.com/raspberrypi/linux/tags
+# eg: raspberrypi-kernel_1.20160921-1
+#
+# On some occassions it appears the binaries included with Raspbian are not based on a tag.
+# When this is the case, the following steps can be used to find the commit hash instead:
+# 1) Mount the Raspbian image locally, or browse a 'booted' Raspbian and look in /usr/share/doc/raspberrypi-bootloader
+# 1a) loopdev=$(sudo losetup -Pf --show 2016-11-25-raspbian-jessie-lite.img)
+# 1b) sudo mount -o ro ${loopdev}p2 mountpoint/
+# 1c) zgrep "firmware as of" mountpoint/usr/share/doc/raspberrypi-bootloader/changelog.Debian.gz | head -1 | awk '{ print $5 }'
+# 1d) sudo umount mountpoint
+# 1e) sudo losetup -d $loopdev
+# 2) The output of 1c) provides the raspberry/firmware commit hash. Use this to determine the raspberrypi/linux commit hash.
+# 2a) Eg. visit https://github.com/raspberrypi/firmware/tree/5d80cd839dd4fe283d573df2ec3f3829b09b33f0 and open extra/git_hash
+# 3) The content of 2a) provides the desired kernel hash, eg: fa00f31867d8f7b7bb2ad2eb6c35f32fa468ca1e
+# 3a) Set the BRANCH to this value.
+#
+# Current Version Raspbian 2016-11-25 - Kernel 4.4.34 (fa00f31867d8f7b7bb2ad2eb6c35f32fa468ca1e)
+##
+BRANCH=fa00f31867d8f7b7bb2ad2eb6c35f32fa468ca1e
 
 if [ -f build-kernel-qemu.conf ] ; then
 	. build-kernel-qemu.conf
@@ -17,24 +38,16 @@ fi
 
 mkdir -p target
 
-if [ "$INSTALL_PACKAGES" ] ; then
-	sudo apt-get update
-	sudo apt-get install git libncurses5-dev gcc-arm-linux-gnueabihf
-fi
-
 if [ -n "$BRANCH" ] ; then
-	# change BRANCH if you want to change kernel version
-	# for kernel specific tags, have a looks at : https://github.com/raspberrypi/linux/tags
-	if [ ! -d linux ] ; then
-		git clone --branch $BRANCH --depth 1 https://github.com/raspberrypi/linux.git
-	else
-		echo "using existing linux sources, reverting changes!"
-		cd linux
-		git clean -fd
-		git reset --hard
-		cd ..
+	srcname=linux-${BRANCH}
+	if [ ! -f $srcname.zip ] ; then
+		wget https://github.com/raspberrypi/linux/archive/$BRANCH.zip -O $srcname.zip
 	fi
-	cd linux
+	if [ -e $srcname ]; then
+		rm -rf $srcname
+	fi
+	unzip -q $srcname.zip
+	cd $srcname
 else
 	echo "BRANCH missing!" >&2
 	exit 1
@@ -101,3 +114,4 @@ make -j 4 -k ARCH=arm CROSS_COMPILE=${TOOLCHAIN}- menuconfig
 make -j 4 -k ARCH=arm CROSS_COMPILE=${TOOLCHAIN}- bzImage
 cp arch/arm/boot/zImage ../target/kernel-$KERNEL_VERSION-qemu-rpi-$QEMU_RPI_KERNEL_REVISION
 cd ..
+

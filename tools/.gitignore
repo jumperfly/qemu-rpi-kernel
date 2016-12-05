@@ -1,3 +1,5 @@
 linux
+linux-*.zip
+linux-*/
 build-kernel-qemu.conf
 target
