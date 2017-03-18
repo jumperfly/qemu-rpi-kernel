@@ -28,9 +28,10 @@ TOOLCHAIN=arm-linux-gnueabihf
 # 3) The content of 2a) provides the desired kernel hash, eg: fa00f31867d8f7b7bb2ad2eb6c35f32fa468ca1e
 # 3a) Set the BRANCH to this value.
 #
-# Current Version Raspbian 2016-11-25 - Kernel 4.4.34 (fa00f31867d8f7b7bb2ad2eb6c35f32fa468ca1e)
+# 2016-11-25 - Kernel 4.4.34 (fa00f31867d8f7b7bb2ad2eb6c35f32fa468ca1e)
+# 2017-03-02 - Kernel 4.4.50 (raspberrypi-kernel_1.20170303-1)
 ##
-BRANCH=fa00f31867d8f7b7bb2ad2eb6c35f32fa468ca1e
+BRANCH=raspberrypi-kernel_1.20170303-1
 
 if [ -f build-kernel-qemu.conf ] ; then
 	. build-kernel-qemu.conf
